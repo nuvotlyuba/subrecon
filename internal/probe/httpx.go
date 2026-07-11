@@ -9,8 +9,6 @@ import (
 	"github.com/projectdiscovery/httpx/runner"
 )
 
-// Result — упрощённая проекция runner.Result httpx (полная структура
-// содержит десятки полей, нам достаточно этих).
 type Result struct {
 	URL          string
 	StatusCode   int
@@ -18,9 +16,6 @@ type Result struct {
 	Technologies []string
 }
 
-// Probe запускает httpx как библиотеку (через New + RunEnumeration) и
-// собирает результаты синхронно через колбэк Options.OnResult
-// (подтверждено: пакет runner, v1.3.7, поле используется в runner.go:747).
 func Probe(domains []string) ([]Result, error) {
 	var results []Result
 

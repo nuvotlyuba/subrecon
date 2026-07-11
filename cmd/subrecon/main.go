@@ -1,8 +1,10 @@
 // Command subrecon — оркестратор пассивной и активной разведки поддоменов.
 //
-//	subrecon example.com
-//	subrecon example.com --active --wordlist wordlists/subdomains-top5000.txt
-//	subrecon example.com --active --http-probe
+// go build -o dirrecon ./cmd/subrecon/main.go
+//
+//	./subrecon zonetransfer.me
+//	./subrecon zonetransfer.me --active --wordlist wordlists/subdomains-top5000.txt
+//	./subrecon zonetransfer.me --active --http-probe
 package main
 
 import (
@@ -28,7 +30,7 @@ func main() {
 	wordlist := flag.String("wordlist", "wordlists/subdomains-top5000.txt", "путь к словарю для брутфорса")
 	noResolve := flag.Bool("no-resolve", false, "не фильтровать мёртвые DNS-записи")
 	httpProbe := flag.Bool("http-probe", false, "прогнать живые домены через httpx")
-	output := flag.String("output", "subdomains.json", "файл для результатов")
+	output := flag.String("output", "", "файл для результатов")
 	flag.Parse()
 
 	target := *domain
@@ -43,9 +45,23 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 
-	found := runPassive(ctx, target)
+	found := make(map[string]struct{})
 
+	mode := "passive"
 	if *activeFlag {
+		mode = "active"
+	}
+
+	if *output == "" {
+		if mode == "active" {
+			*output = "active_subdomains.json"
+		} else {
+			*output = "passive_subdomains.json"
+		}
+	}
+	if *activeFlag {
+		mode = "active"
+		log.Printf("[*] Активная разведка для %s...", target)
 		bruteResults, err := active.Bruteforce(ctx, target, *wordlist, active.DefaultBruteforceConfig())
 		if err != nil {
 			log.Printf("[!] Ошибка брутфорса: %v", err)
@@ -54,6 +70,8 @@ func main() {
 			found[d] = struct{}{}
 		}
 		log.Printf("    gobuster-style brute: найдено %d", len(bruteResults))
+	} else {
+		found = runPassive(ctx, target)
 	}
 
 	log.Printf("[+] Всего уникальных поддоменов (до фильтрации): %d", len(found))
@@ -83,8 +101,23 @@ func main() {
 			log.Printf("[!] Ошибка httpx-пробинга: %v", err)
 		} else {
 			probeData, _ := json.MarshalIndent(results, "", "  ")
-			os.WriteFile("httpx_results.json", probeData, 0o644)
-			log.Printf("[+] HTTP-пробы сохранены в httpx_results.json")
+			probeFile := "passive_httpx_results.json"
+
+			if mode == "active" {
+				probeFile = "active_httpx_results.json"
+			}
+
+			err := os.WriteFile(
+				probeFile,
+				probeData,
+				0644,
+			)
+
+			if err != nil {
+				log.Printf("[!] Ошибка сохранения probe: %v", err)
+			} else {
+				log.Printf("[+] HTTP-пробы сохранены в %s", probeFile)
+			}
 		}
 	}
 }

@@ -1,4 +1,4 @@
-# subrecon-go
+# subrecon
 
 Оркестратор разведки поддоменов. Опрашивает четыре пассивных источника
 (`subfinder`, `assetfinder`, `amass`, `crt.sh`) параллельно, умеет
@@ -15,8 +15,8 @@
 ## Установка
 
 ```bash
-git clone git@github.com:nuvotlyuba/subdomain-recon-go.git
-cd subrecon-go
+git clone git@github.com:nuvotlyuba/subrecon.git
+cd subrecon
 go mod tidy
 go build -o subrecon ./cmd/subrecon
 ```
@@ -54,15 +54,3 @@ subrecon-go/
 │   └── probe/
 │       └── httpx.go         # httpx как библиотека
 ```
-
-## Заметки
-
-- `RemoveWildcard` в опциях subfinder выключен намеренно: при `true`
-  subfinder резолвит найденные поддомены через свой внутренний DNS-клиент
-  перед тем, как отдать их через колбэк, и на доменах с нетривиальной
-  DNS-конфигурацией это может обнулить результат целиком. Фильтрацию
-  живых доменов делает `resolver.FilterAlive()` уже после сбора данных
-  со всех источников — одним и тем же способом для всех.
-- `amass` без сконфигурированных API-ключей ограничен бесплатными
-  источниками и на многих доменах может закономерно найти 0 поддоменов —
-  это не ошибка инструмента.
