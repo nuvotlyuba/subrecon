@@ -1,10 +1,3 @@
-// Command subrecon — оркестратор пассивной и активной разведки поддоменов.
-//
-// go build -o dirrecon ./cmd/subrecon/main.go
-//
-//	./subrecon zonetransfer.me
-//	./subrecon zonetransfer.me --active --wordlist wordlists/subdomains-top5000.txt
-//	./subrecon zonetransfer.me --active --http-probe
 package main
 
 import (

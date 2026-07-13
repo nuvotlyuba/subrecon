@@ -1,4 +1,3 @@
-// Package passive содержит источники пассивной разведки поддоменов.
 package passive
 
 import (
@@ -10,19 +9,13 @@ import (
 	"time"
 )
 
-// crtshEntry — один элемент JSON-ответа crt.sh.
-// Нас интересует только name_value — он может содержать несколько
-// доменов через перенос строки (например, SAN-сертификат).
 type crtshEntry struct {
 	NameValue string `json:"name_value"`
 }
 
-// CrtshConfig задаёт таймаут и число повторных попыток запроса.
-// crt.sh известен тем, что часто подвисает под нагрузкой — поэтому
-// retry с экспоненциальной паузой включён по умолчанию.
 type CrtshConfig struct {
-	Timeout    time.Duration
-	MaxRetries int
+	Timeout     time.Duration
+	MaxRetries  int
 	BackoffBase time.Duration
 }
 
@@ -34,8 +27,6 @@ func DefaultCrtshConfig() CrtshConfig {
 	}
 }
 
-// Crtsh запрашивает Certificate Transparency логи через crt.sh и
-// возвращает множество поддоменов, принадлежащих указанному домену.
 func Crtsh(ctx context.Context, domain string, cfg CrtshConfig) (map[string]struct{}, error) {
 	url := fmt.Sprintf("https://crt.sh/?q=%%.%s&output=json", domain)
 

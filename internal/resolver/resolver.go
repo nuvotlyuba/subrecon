@@ -1,5 +1,3 @@
-// Package resolver проверяет, действительно ли найденные поддомены
-// резолвятся в DNS — отсеивает "мёртвые" записи из CT-логов.
 package resolver
 
 import (
@@ -8,15 +6,11 @@ import (
 	"sync"
 )
 
-// ResolveOne возвращает true, если у домена есть хотя бы одна A/AAAA запись.
 func ResolveOne(ctx context.Context, resolver *net.Resolver, domain string) bool {
 	_, err := resolver.LookupHost(ctx, domain)
 	return err == nil
 }
 
-// FilterAlive параллельно резолвит множество доменов и возвращает только живые.
-// maxWorkers ограничивает число одновременных DNS-запросов, чтобы не устроить
-// самому себе (или, что хуже, чужому DNS-серверу) непреднамеренный флуд.
 func FilterAlive(ctx context.Context, domains map[string]struct{}, maxWorkers int) map[string]struct{} {
 	resolver := net.DefaultResolver
 

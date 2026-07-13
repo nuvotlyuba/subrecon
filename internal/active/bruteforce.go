@@ -1,9 +1,3 @@
-// Package active реализует DNS-брутфорс поддоменов.
-//
-// gobuster не экспортирует чистый библиотечный API для DNS-режима
-// (его логика завязана на cobra CLI), поэтому вместо обёртки над ним
-// проще и надёжнее реализовать брутфорс напрямую — это меньше 40 строк
-// поверх net.LookupHost и не тянет лишнюю зависимость.
 package active
 
 import (
@@ -15,7 +9,6 @@ import (
 	"sync"
 )
 
-// BruteforceConfig задаёт число одновременных воркеров.
 type BruteforceConfig struct {
 	Workers int
 }
@@ -24,8 +17,6 @@ func DefaultBruteforceConfig() BruteforceConfig {
 	return BruteforceConfig{Workers: 50}
 }
 
-// Bruteforce читает слова из wordlistPath, для каждого пробует
-// резолвить word.domain и возвращает множество найденных поддоменов.
 func Bruteforce(ctx context.Context, domain, wordlistPath string, cfg BruteforceConfig) (map[string]struct{}, error) {
 	file, err := os.Open(wordlistPath)
 	if err != nil {
